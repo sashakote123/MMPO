@@ -5,52 +5,28 @@ from statistics import mean
 from matplotlib import pyplot as plt
 
 
-def Func1(i, j, y1, y2):
-    return (math.sin(i * math.pi * (y1 - 0.5)) * math.sin(j * math.pi * (y2 - 0.5)))
-
-
-def Func2(i, j, y1, y2):
-    return (math.cos(i * math.pi * (y1 - 0.5)) * math.cos(j * math.pi * (y2 - 0.5)))
-
-
-def generateMatrix(size):
-    matrix = [[random.uniform(-1, 1) for j in range(size)] for i in range(size)]
-    return matrix
-
-
 def generateZeroMatrix(sizeN, sizeM):
     matrix = [[0 for j in range(sizeM)] for i in range(sizeN)]
     return matrix
 
 
-# def CreatePoint():
-#    a = random.randrange(10)
-#    b = random.randrange(10)
-#    return a, b
-
-
-def Fitness(point):
-    A = generateMatrix(7)
-    B = generateMatrix(7)
-    C = generateMatrix(7)
-    D = generateMatrix(7)
-    for i in range(7):
-        for j in range(7):
-            a = A[i][j] * float(Func1(i, j, point[0], point[1])) + B[i][j] * float(Func2(i, j, point[0], point[1]))
-
-            b = C[i][j] * float(Func1(i, j, point[0], point[1])) + D[i][j] * float(Func2(i, j, point[0], point[1]))
-
-    return (a ** 2 + b ** 2) ** (1 / 2)
-
-
-def Fitness2(point):
+def Fitness22(point):
     J = 0
     sum = 0.0
     for i in range(len(point)):
-        sum = sum + (10 * math.cos(2 * math.pi * point[i]) - point[i]**2)
-    denominator = 1 + np.exp(-1/(2*len(point)) * (-10 * len(point) + sum))
-    J = 1/denominator
+        sum = sum + (10 * math.cos(2 * math.pi * point[i]) - point[i] ** 2)
+    denominator = 1 + np.exp(-1 / (2 * len(point)) * (-10 * len(point) + sum))
+    J = 1 / denominator
     return J
+
+
+def Fitness2(point):
+    x_mean = np.mean(point)
+    return x_mean ** 2 - (10 * np.cos(2 * np.pi * x_mean) + 10)
+
+def Fitness22(point):
+    x_mean = np.mean(point)
+    return (x_mean-2**(1/2))**2-1
 
 
 def generatePopulation(sizeN, sizeM):
@@ -60,112 +36,6 @@ def generatePopulation(sizeN, sizeM):
         for j in range(sizeM):
             matrix[i].append(random.randrange(5))
     return matrix
-
-
-def GenerateProbability(matrix, n):
-    list = []
-    sum = 0
-    for i in range(n):
-        sum = sum + matrix[i]
-    for i in range(n):
-        list.append(matrix[i] / sum)
-    return list
-
-
-def gauss_func(xi, mat_wait, deviation):
-    prob_i_comp_in_j_point = 1 / (np.sqrt(2 * np.pi) * deviation) * np.exp(
-        -((xi - mat_wait) ** 2) / (2 * deviation ** 2))
-    return prob_i_comp_in_j_point
-
-
-def gauss(i, matrix, prob_list):
-    list_i = []
-    for j in range(len(prob_list)):
-        list_i.append(matrix[j][i])
-    mat_wait = 0
-    for j in range(len(prob_list)):
-        mat_wait += matrix[j][i] * (1 / len(prob_list))
-    mat_wait_sqr = 0
-    for j in range(len(prob_list)):
-        mat_wait += (matrix[j][i]) ** 2 * (1 / len(prob_list))
-    dispers = abs(mat_wait_sqr - mat_wait ** 2)
-    middle_sqr_deviation = np.sqrt(dispers)
-    prob_list_2 = []
-    for j in range(len(prob_list)):
-        prob_list_2.append(gauss_func(list_i[j], mat_wait, middle_sqr_deviation))
-    choice = random.choices(list_i, weights=prob_list_2, k=1)
-    return choice
-
-
-def mutation(point, matrix, prob_list):
-    tmp = []
-    prob_list_2 = []
-    for i in range(len(point)):
-        tmp.append(point[i])
-    for i in range(len(point)):
-        prob_list_2.append(gauss(i, matrix, prob_list))
-    for i in range(len(point)):
-        tmp[i] = gauss(i, matrix, prob_list)
-    return tmp
-
-
-def SoFa(N, matrix):
-    i = 0
-    while i < N:
-        fitness_list = []
-        fitness_list = Fitness2(matrix)
-        prob_list = GenerateProbability(fitness_list, len(matrix))
-        choice = random.choices(matrix, weights=prob_list)
-        choice2 = choice[0]
-        # print('Выбор на шаге ', i+1, choice2)
-        mutant = mutation(choice2, matrix, prob_list)
-        mutant2 = []
-        for j in range(len(mutant)):
-            mutant2.append(mutant[j][0])
-        matrix.append(mutant2)
-        # print('матрица на шаге ',i+1, matrix )
-        i += 1
-    fitness_list = Fitness2(matrix)
-
-    index = fitness_list.index(min(fitness_list))
-    return matrix, matrix[index], min(fitness_list), index
-
-
-'''''
-testPopulation = generatePopulation(10, 4)
-matrix = generateZeroMatrix(10, 3)
-probmatrix = generateZeroMatrix(10, 3)
-
-List_J = []
-List_J_avg = []
-List_x = []
-for j in range(1, 50):
-
-    for i in range(2):
-        Population = generatePopulation(3,2)
-        List_J.append(SoFa(40*j, Population)[2])
-
-    print(mean(List_J))
-    List_J_avg.append(mean(List_J))
-    List_x.append(40*j)
-plt.title('base SoFa')
-plt.plot(List_x,List_J_avg)
-
-plt.show()
-
-
-
-for i in range(10):
-    print(testPopulation[i])
-print(' ')
-second_population, maximum, ind = SoFa(10, testPopulation)
-
-for i in range(20):
-    print(second_population[i])
-print(' ')
-print(maximum, ind)
-
-'''''
 
 
 # Дифференциальная эволюция. Базовая версия
@@ -203,7 +73,7 @@ def crossover(CR, x, v):
 
 
 def selection(x, u):
-    if Fitness2(u) >= Fitness2(x):
+    if Fitness2(u) <= Fitness2(x):
         y = u
     else:
         y = x
@@ -265,30 +135,49 @@ bottom = 0
 N = 20
 M = 10
 
-firstPopulation = generatePopulation(N, M)
 
-x_list = []
-fitness_list = []
-population = []
+def GetLists(itr):
+    firstPopulation = generatePopulation(N, M)
 
-for i in range(2):
-    population = firstPopulation
-    List = []
-    for j in range(20000):
-        my_list = DE_func(N, population)
-        for k in range(N):
-            population[k] = my_list[1][k]
-        List.append(my_list[0])
-    if i != 0:
-        for k in range(20000):
-            fitness_list[k] = (fitness_list[k] + List[k])/2
-    else:
-        for k in range(20000):
-            fitness_list.append(List[k])
+    x_list = []
+    fitness_list = []
+    population = []
 
-for i in range(20000):
-    x_list.append(i)
+
+    for i in range(2):
+        population = firstPopulation
+        List = []
+        for j in range(itr):
+            my_list = DE_func(N, population)
+            for k in range(N):
+                population[k] = my_list[1][k]
+            List.append(my_list[0])
+        if i != 0:
+            for k in range(itr):
+                fitness_list[k] = (fitness_list[k] + List[k]) / 2
+        else:
+            for k in range(itr):
+                fitness_list.append(List[k])
+
+    for i in range(itr):
+        x_list.append(i)
+
+    delta = 0
+    delta_tmp = 0
+    delta_last = 0
+    x = 0
+    for i in range(itr - 2):
+        delta_tmp = fitness_list[i] - fitness_list[i + 1]
+        delta = fitness_list[i + 1] - fitness_list[i + 2]
+        if delta_tmp != 0 and delta == 0:
+            delta_last = fitness_list[i+2]
+            x = i+2
+
+    return x_list, fitness_list, delta_last, x
+
+data = GetLists(500)
+print(data[2], "на", data[3], 'итерации')
 
 plt.title("DE_func")
-plt.plot(x_list, fitness_list)
+plt.plot(data[0], data[1])
 plt.show()

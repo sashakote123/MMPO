@@ -5,13 +5,18 @@ from statistics import mean
 from matplotlib import pyplot as plt
 
 
-def Fitness2(point):
+def Fitness22(point):
     sum = 0.0
     for i in range(len(point)):
         sum = sum + (10 * math.cos(2 * math.pi * point[i]) - point[i]**2)
     denominator = 1 + np.exp(-1/(2*len(point)) * (-10 * len(point) + sum))
     J = 1/denominator
     return J
+
+def Fitness2(point):
+    x_mean = np.mean(point)
+    return x_mean**2-(10*np.cos(2*np.pi*x_mean)+10)
+
 
 
 def generatePopulation(sizeN, sizeM):
@@ -31,16 +36,7 @@ def adjust_dimension(matrix, t):
     return population
 
 
-def norm_spread(mat_wait, deviation):
-    list_f = []
-    for i in range(1, 10):
-        list_f.append(i/10)
-    prob_list_norm = []
-    for i in range(1, 10):
-        prob_list_norm.append(gauss_func(i, mat_wait, deviation))
-    choice = random.choices(list_f, weights=prob_list_norm, k=1)
-    choice = choice[0]
-    return choice
+
 
 
 def mutantVector_rand_1(F, a, b, c):
@@ -149,7 +145,7 @@ def DE_rand_to_best_2(target, population, F1, F2, CR):
 
 ##### <=  >=
 def selection(x, u):
-    if Fitness2(u) >= Fitness2(x):
+    if Fitness2(u) <= Fitness2(x):
         y = u
     else:
         y = x
@@ -161,7 +157,7 @@ def find_best(list_species):
     J_best = Fitness2(best)
     for i in range(len(list_species)):
         J_tmp = Fitness2(list_species[i])
-        if J_tmp >= J_best:
+        if J_tmp <= J_best:
             J_best = J_tmp
             best = list_species[i]
     return best
@@ -191,7 +187,7 @@ def DE_func(n, population, strategy_success, list_f, cr_list):
 
     for i in range(n):
         list_fit.append(Fitness2(tmp_population[i]))
-    J = max(list_fit)
+    J = min(list_fit)
     for i in range(4):
         strategy_rate[i] = strategy_rate[i] / 4
     mylist = [J, tmp_population, strategy_rate]
@@ -201,11 +197,11 @@ def DE_func(n, population, strategy_success, list_f, cr_list):
 top = 10
 bottom = 0
 
-NP = 5
-M = 5
+NP = 7
+M = 7
 
-itr = 10000    # Число итераций
-dim_up = 100   # Контроль частоты увеличения размерности пространства параметров
+itr = 300   # Число итераций
+dim_up = 100000   # Контроль частоты увеличения размерности пространства параметров
 
 # SaDE
 

@@ -1,14 +1,9 @@
-
-
-import timeit
-
-code_to_test = """""
 import random
 import math
 import numpy as np
 from statistics import mean
 from matplotlib import pyplot as plt
-def Fitness2(point):
+def Fitness22(point):
     sum = 0.0
     for i in range(len(point)):
         sum = sum + (10 * math.cos(2 * math.pi * point[i]) - point[i]**2)
@@ -16,6 +11,9 @@ def Fitness2(point):
     J = 1/denominator
     return J
 
+def Fitness2(point):
+    x_mean = np.mean(point)
+    return x_mean**2-(10*np.cos(2*np.pi*x_mean)+10)
 
 def generatePopulation(sizeN, sizeM):
     matrix = []
@@ -36,23 +34,12 @@ def GenerateProbability(matrix, n):
     return list
 
 
-t = 0
 def adjust_dimension(matrix, t):
     for i in range(len(matrix)):
         matrix[i].append(random.randrange(5)/(2**t))
     return matrix
 
 
-def norm_spread(mat_wait, deviation):
-    list_f = []
-    for i in range(1, 10):
-        list_f.append(i/10)
-    prob_list_norm = []
-    for i in range(1, 10):
-        prob_list_norm.append(gauss_func(i, mat_wait, deviation))
-    choice = random.choices(list_f, weights=prob_list_norm, k=1)
-    choice = choice[0]
-    return choice
 
 
 def gauss_func(xi, mat_wait, deviation):
@@ -213,7 +200,7 @@ def DE_rand_to_best_2(target, population, F1, F2, CR):
 
 ##### <=  >=
 def selection(x, u):
-    if Fitness2(u) >= Fitness2(x):
+    if Fitness2(u) <= Fitness2(x):
         y = u
     else:
         y = x
@@ -225,7 +212,7 @@ def find_best(list_species):
     J_best = Fitness2(best)
     for i in range(len(list_species)):
         J_tmp = Fitness2(list_species[i])
-        if J_tmp >= J_best:
+        if J_tmp <= J_best:
             J_best = J_tmp
             best = list_species[i]
     return best
@@ -266,82 +253,96 @@ def MAIN_func(n, population, strategy_success, list_f, cr_list):
 
     for i in range(n):
         list_fit.append(Fitness2(tmp_population[i]))
-    J = max(list_fit)
+    J = min(list_fit)
     for i in range(4):
         strategy_rate[i] = strategy_rate[i] / 4
     mylist = [J, tmp_population, strategy_rate]
     return mylist
 
-
-top = 10
-bottom = 0
-
 NP = 5
 M = 5
-
-itr = 1000    # Число итераций
-dim_up = 1000000   # Контроль частоты увеличения размерности пространства параметров
-
-# Control Parameter Adaptation:
-CRm = 0
-
-population = []
-list_F = []
-CR_list = []
+top = 10
+bottom = 0
 CR_list_record = [0.5]
-strategy_success = []
-
-x_list = []
-Fitness_list = []
-
-for i in range(5):
-    population = generatePopulation(NP, M)
-    List_Fit_in_one_go = []
-    strategy_success = [1, 1, 1, 1]
-    for j in range(itr):
-        if j % 20 == 0:
-            if len(CR_list_record) == 0:
-                CR_list_record.append(0)
-            CRm = sum(CR_list_record)/len(CR_list_record)
-            CR_list.clear()
-            for k in range(5):
-                CR_list.append(random.gauss(CRm, 0.1))
-            CR_list_record.clear()
-
-        list_F.clear()
-        for k in range(4):
-            list_F.append(random.gauss(0.5, 0.3))
-
-        my_list = MAIN_func(NP, population, strategy_success, list_F, CR_list)
-
-        ## Рост размерности:
-        if j % dim_up == 0:
-            population = adjust_dimension(population, t)
-            t += 1
-        ##
-
-        List_Fit_in_one_go.append(my_list[0])
-        for k in range(NP):
-            population[k] = my_list[1][k]
-        for k in range(4):
-            strategy_success[k] = my_list[2][k]
-
-    if i != 0:
-        for k in range(itr):
-            Fitness_list[k] = (Fitness_list[k] + List_Fit_in_one_go[k])/2
-    else:
-        for k in range(itr):
-            Fitness_list.append(List_Fit_in_one_go[k])
+def GetLists(itr):
 
 
-for i in range(itr):
-    x_list.append(i)
+    # Число итераций
+    dim_up = 1000000   # Контроль частоты увеличения размерности пространства параметров
+
+    # Control Parameter Adaptation:
+    CRm = 0
+
+    t = 0
+    population = []
+    list_F = []
+    CR_list = []
+
+    strategy_success = []
+
+    x_list = []
+    Fitness_list = []
+
+    for i in range(5):
+        population = generatePopulation(NP, M)
+        List_Fit_in_one_go = []
+        strategy_success = [1, 1, 1, 1]
+        for j in range(itr):
+            if j % 20 == 0:
+                if len(CR_list_record) == 0:
+                    CR_list_record.append(0)
+                CRm = sum(CR_list_record)/len(CR_list_record)
+                CR_list.clear()
+                for k in range(5):
+                    CR_list.append(random.gauss(CRm, 0.1))
+                CR_list_record.clear()
+
+            list_F.clear()
+            for k in range(4):
+                list_F.append(random.gauss(0.5, 0.3))
+
+            my_list = MAIN_func(NP, population, strategy_success, list_F, CR_list)
+
+            ## Рост размерности:
+            if j % dim_up == 0:
+                population = adjust_dimension(population, t)
+                t += 1
+            ##
+
+            List_Fit_in_one_go.append(my_list[0])
+            for k in range(NP):
+                population[k] = my_list[1][k]
+            for k in range(4):
+                strategy_success[k] = my_list[2][k]
+
+        if i != 0:
+            for k in range(itr):
+                Fitness_list[k] = (Fitness_list[k] + List_Fit_in_one_go[k])/2
+        else:
+            for k in range(itr):
+                Fitness_list.append(List_Fit_in_one_go[k])
 
 
-#plt.title("SoFA_<DE_Mod>")
-#plt.plot(x_list, Fitness_list)
-#plt.show()
-"""""
+    for i in range(itr):
+        x_list.append(i)
 
-elapsed_time = timeit.timeit(code_to_test, number=10)/10
-print('Скорость SoFA_with_DE_SaDE', elapsed_time, 'секунд')
+    delta = 0
+    delta_tmp = 0
+    delta_last = 0
+    x = 0
+    for i in range(itr - 2):
+        delta_tmp = Fitness_list[i] - Fitness_list[i + 1]
+        delta = Fitness_list[i + 1] - Fitness_list[i + 2]
+        if delta_tmp != 0 and delta == 0:
+            delta_last = Fitness_list[i+2]
+            x = i+2
+
+
+    return x_list, Fitness_list, delta_last, x
+
+data = GetLists(500)
+print(data[2], "на", data[3], 'итерации')
+
+plt.title("DE_func")
+plt.plot(data[0], data[1])
+plt.show()
