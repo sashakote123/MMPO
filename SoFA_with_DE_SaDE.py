@@ -11,7 +11,32 @@ def Fitness22(point):
     J = 1/denominator
     return J
 
+def Fitness22(point):
+    x_mean = np.mean(point)
+    return x_mean ** 2 - (10 * np.cos(2 * np.pi * x_mean) + 10)
+
+
+def Fitness22(point):
+    x_mean = np.mean(point)
+    return (x_mean - 2 ** (1 / 2)) ** 2 - 1
+
+
+def Fitness22(point):
+    sum = 0.00001
+    for i in range(len(point)):
+        sum = sum + point[i] ** 2
+
+    return sum
+
 def Fitness2(point):
+    sum = 0.0
+    for i in range(len(point)):
+        sum = sum + point[i] ** 2 - np.cos(2 * np.pi * point[i])
+
+    return sum
+
+
+def Fitness22(point):
     x_mean = np.mean(point)
     return x_mean**2-(10*np.cos(2*np.pi*x_mean)+10)
 
@@ -340,9 +365,9 @@ def GetLists(itr):
 
     return x_list, Fitness_list, delta_last, x
 
-data = GetLists(500)
+data = GetLists(50)
 print(data[2], "на", data[3], 'итерации')
 
-plt.title("DE_func")
+plt.title("SoFA mod 1")
 plt.plot(data[0], data[1])
 plt.show()

@@ -36,12 +36,18 @@ def Fitness22(point):
 
     return sum
 
-def Fitness2(point):
+def Fitness22(point):
     sum = 0.0
     for i in range(len(point)):
         sum = sum + point[i] ** 2 - np.cos(2 * np.pi * point[i])
 
     return 10 + sum
+
+def Fitness2(pointx, pointy):
+    x = mean(pointx)
+    y = mean(pointy)
+    return (x + 2 * y - 7) ** 2 + (2 * x + y - 5) ** 2
+
 
 
 def generatePopulation(sizeN, sizeM):
@@ -87,54 +93,76 @@ def crossover(CR, x, v):
     return u
 
 
-def selection(x, u):
-    if Fitness2(u) <= Fitness2(x):
-        y = u
+def selection(x,y, u,v):
+    if Fitness2(u ,v) <= Fitness2(x, y):
+        z1 = u
     else:
-        y = x
-    return y
+        z1 = x
+
+    if Fitness2(u, v) <= Fitness2(x, y):
+        z2 = v
+    else:
+        z2 = y
+
+    return z1, z2
 
 
-def DE_func(N, Population):
+def DE_func(N, Population, Population2):
     F = 0.5
     CR = 0.8
     list_fit = []
     for i in range(N):
         v = mutantVector(F, Population[i], Population[random.randrange(N)], Population[random.randrange(N)])
         u = crossover(CR, Population[i], v)
-        Population[i] = selection(Population[i], u)
+        Population[i] = selection(Population[i],Population2[i], u, v)
     for i in range(N):
-        list_fit.append(Fitness2(Population[i]))
+        list_fit.append(Fitness2(Population[i], Population2[i]))
     J = min(list_fit)
     mylist = [J, Population]
     return mylist
 
 
-def DE_func_with_SoFa(N, firstPopulation):
+def DE_func_with_SoFa(N, firstPopulation, firstPopulation2):
     m = len(firstPopulation)
     n = len(firstPopulation[0])
     population = generateZeroMatrix(m, n)
+    population2 = generateZeroMatrix(m, n)
+
 
     F = 0.5
     CR = 0.8
     for i in range(N):
         for j in range(m):
             fitness_list = []
-            fitness_list = Fitness2(firstPopulation)
+            fitness_list = Fitness2(firstPopulation, firstPopulation2)
             prob_list = GenerateProbability(fitness_list, len(firstPopulation))
+
             choice = random.choices(firstPopulation, weights=prob_list)
             choice = choice[0]
+
+            choice2 = random.choices(firstPopulation2, weights=prob_list)
+            choice2 = choice2[0]
+
             v = mutantVector(F, choice, firstPopulation[random.randrange(m)],
                              firstPopulation[random.randrange(m)])
             u = crossover(CR, firstPopulation[j], v)
-            population[j] = selection(firstPopulation[j], u)
+
+            v2 = mutantVector(F, choice2, firstPopulation2[random.randrange(m)],
+                             firstPopulation2[random.randrange(m)])
+            u2 = crossover(CR, firstPopulation2[j], v2)
+
+            population[j] = selection(firstPopulation[j], u, firstPopulation2[j], u2)[0]
+            population2[j] = selection(firstPopulation[j], u, firstPopulation2[j], u2)[1]
         # print('Current population:', population)
         firstPopulation = population
         population = generateZeroMatrix(m, n)
 
+        firstPopulation2 = population2
+        population2 = generateZeroMatrix(m, n)
+
     FitnessMatrix = []
     for i in range(m):
-        FitnessMatrix.append(Fitness(firstPopulation[i]))
+        FitnessMatrix.append(Fitness(firstPopulation[i], firstPopulation2[i]))
 
     # print('Fitness of all points:', FitnessMatrix)
     y = min(FitnessMatrix)
@@ -147,12 +175,13 @@ def DE_func_with_SoFa(N, firstPopulation):
 top = 10
 bottom = 0
 
-N = 10
+N = 20
 M = 10
 
 
 def GetLists(itr):
     firstPopulation = generatePopulation(N, M)
+    firstPopulation2 = generatePopulation(N, M)
 
     x_list = []
     fitness_list = []
@@ -161,9 +190,10 @@ def GetLists(itr):
 
     for i in range(2):
         population = firstPopulation
+        population2 = firstPopulation2
         List = []
         for j in range(itr):
-            my_list = DE_func(N, population)
+            my_list = DE_func(N, population, population2)
             for k in range(N):
                 population[k] = my_list[1][k]
             List.append(my_list[0])
@@ -190,13 +220,9 @@ def GetLists(itr):
 
     return x_list, fitness_list, delta_last, x
 
-for i in range(30):
-    data = GetLists(50)
-    print(data[2], "на", data[3], 'итерации')
-
 data = GetLists(500)
 print(data[2], "на", data[3], 'итерации')
 
-plt.title("DE")
+plt.title("DE_func")
 plt.plot(data[0], data[1])
 plt.show()

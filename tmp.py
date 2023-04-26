@@ -31,7 +31,7 @@ def Fitness22(point):
     return (x_mean - 2 ** (1 / 2)) ** 2 - 1
 
 
-def Fitness2(point):
+def Fitness22(point):
     sum = 0.0
     for i in range(len(point)):
         sum = sum + point[i] ** 2
@@ -47,6 +47,16 @@ def Fitness22(point):
     return sum
 
 
+def Fitness22(pointx, pointy):
+    x = mean(pointx)
+    y = mean(pointy)
+    return (x + 2 * y - 7) ** 2 + (2 * x + y - 5) ** 2
+
+
+def Fitness2(pointx, pointy):
+    x = mean(pointx)
+    y = mean(pointy)
+    return -20 * np.exp(-0.2 * (0.5 * (x ** 2 + y ** 2)) ** (1 / 2)) - np.exp(0.5 * (np.cos(2 * np.pi * x) + np.cos(2 * np.pi * y))) + np.e + 20
 
 
 def generatePopulation(sizeN, sizeM):
@@ -54,8 +64,7 @@ def generatePopulation(sizeN, sizeM):
     for i in range(sizeN):
         matrix.append([])
         for j in range(sizeM):
-            matrix[i].append(random.randrange(10))
-            #matrix[i].append(random.random())
+            matrix[i].append(random.randrange(5))
     return matrix
 
 
@@ -109,22 +118,29 @@ def mutation(point, matrix):
 
 
 ## max
-def SoFA(population):
+def SoFA(populationx, populationy):
     fitness_population = []
-    for i in range(len(population)):
-        fitness_population.append(Fitness2(population[i]))
-    probability_population = GenerateProbability(fitness_population, len(population))
+    for i in range(len(populationx)):
+        fitness_population.append(Fitness2(populationx[i], populationy[i]))
+    probability_population = GenerateProbability(fitness_population, len(populationx))
 
-    choice = random.choices(population, weights=probability_population, k=1)
-    choice = choice[0]
+    choice1 = random.choices(populationx, weights=probability_population, k=1)
+    choice1 = choice1[0]
 
-    mutant = mutation(choice, population)
-    population.append(mutant)
+    choice2 = random.choices(populationy, weights=probability_population, k=1)
+    choice2 = choice2[0]
+
+    mutant1 = mutation(choice1, populationx)
+    populationx.append(mutant1)
+
+    mutant2 = mutation(choice2, populationy)
+    populationy.append(mutant2)
+
     fitness_population.clear()
-    for i in range(len(population)):
-        fitness_population.append(Fitness2(population[i]))
+    for i in range(len(populationx)):
+        fitness_population.append(Fitness2(populationx[i], populationy[i]))
     fit = min(fitness_population)
-    return fit, population
+    return fit, populationx, populationy
 
 
 # SoFA_base
@@ -134,22 +150,25 @@ def GetLists(itr):
     # Число итераций
     dim_up = 20000  # Контроль частоты увеличения размерности пространства параметров
 
-    NP = 100
-    M = 1
+    NP = 10
+    M = 10
 
     t = 0
-    population = []
+    populationx = []
+    populationy = []
     x_list = []
     Fitness_list = []
 
     for i in range(1):
-        population.clear()
-        population = generatePopulation(NP, M)
+        populationx.clear()
+        populationx = generatePopulation(NP, M)
+        populationy.clear()
+        populationy = generatePopulation(NP, M)
         List_Fit_in_one_go = []
         fitness_population = []
 
-        for j in range(len(population)):
-            fitness_population.append(Fitness2(population[i]))
+        for j in range(len(populationx)):
+            fitness_population.append(Fitness2(populationx[i], populationy[i]))
 
         if i == 0:
             Fitness_list.append(min(fitness_population))
@@ -157,11 +176,11 @@ def GetLists(itr):
             List_Fit_in_one_go.append(min(fitness_population))
 
         for j in range(1, itr):
-            temp_J, population = SoFA(population)
+            temp_J, populationx, populationy = SoFA(populationx, populationy)
             List_Fit_in_one_go.append(temp_J)
             ## Рост размерности:
             if j % dim_up == 0:
-                population = adjust_dimension(population, t)
+                population = adjust_dimension(populationx, t)
                 t += 1
         ##
         if i != 0:
@@ -184,13 +203,11 @@ def GetLists(itr):
             x = i + 2
 
     return x_list, Fitness_list, delta_last, x
-'''''
-for i in range(30):
-    data = GetLists(50)
-    print(data[2], "на", data[3], 'итерации')
-'''''
-data = GetLists(50)
+
+
+data = GetLists(1000)
 print(data[2], "на", data[3], 'итерации')
+
 plt.title("SoFA")
 plt.plot(data[0], data[1])
 plt.show()
