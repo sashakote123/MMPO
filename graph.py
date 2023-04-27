@@ -85,8 +85,11 @@ def run(G, t):
 
     for i in range(len(G.nodes)):
         sum += func(G.nodes[i]['p'])
+        for j in G[i]:
+            if i < j:
+                w_list[0][i][j] = G[i][j]['w']
 
-    T = np.arange(1, t, 1)
+    T = np.arange(0, t, 1)
     for j in T:
         G = GetNewProbability(G)
 
@@ -98,7 +101,7 @@ def run(G, t):
                 if i < k:
                     w_list[j][i][k] = G[i][k]['w']
         G = newDay(G)
-    print(w_list)
+    #print(w_list)
     return sum, w_list
 
 def run2(G, t, x_list):
@@ -138,10 +141,22 @@ N = 5
 G = generateGraph(N, 3)
 
 
+
+
+
 w_list = run(G, T)[1]
 
 
-np.savetxt('file.txt',)
+
+with open('3dcsv.txt','w') as f:
+    for a in w_list:
+        print(a)
+        np.savetxt(f,a,  fmt='%10f')
+        f.write("\n")
+np.save('3dsave.npy',w_list)
+print()
+
+
 #subax1 = plt.plot()
 #nx.draw(G, with_labels=True, node_color='green')
 # plt.show()
