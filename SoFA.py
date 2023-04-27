@@ -5,7 +5,18 @@ import math
 import numpy as np
 from statistics import mean
 from matplotlib import pyplot as plt
+from graph import *
 
+
+
+
+T = 5
+N = 5
+G = generateGraph(N, 3)
+
+
+def Fitness2(point):
+    return run2(G, T, point)[0]
 
 def adjust_dimension(matrix, t):
     population = matrix
@@ -31,7 +42,7 @@ def Fitness22(point):
     return (x_mean - 2 ** (1 / 2)) ** 2 - 1
 
 
-def Fitness2(point):
+def Fitness22(point):
     sum = 0.0
     for i in range(len(point)):
         sum = sum + point[i] ** 2
@@ -54,7 +65,7 @@ def generatePopulation(sizeN, sizeM):
     for i in range(sizeN):
         matrix.append([])
         for j in range(sizeM):
-            matrix[i].append(random.randrange(10))
+            matrix[i].append(random.random())
             #matrix[i].append(random.random())
     return matrix
 
@@ -134,8 +145,8 @@ def GetLists(itr):
     # Число итераций
     dim_up = 20000  # Контроль частоты увеличения размерности пространства параметров
 
-    NP = 100
-    M = 1
+    NP = N
+    M = N
 
     t = 0
     population = []
@@ -189,7 +200,7 @@ for i in range(30):
     data = GetLists(50)
     print(data[2], "на", data[3], 'итерации')
 '''''
-data = GetLists(50)
+data = GetLists(100)
 print(data[2], "на", data[3], 'итерации')
 plt.title("SoFA")
 plt.plot(data[0], data[1])

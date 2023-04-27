@@ -34,7 +34,15 @@ def generateGraph(n, m):
 
     return G
 
-#def generateNewGraph():
+
+# def generateNewGraph()
+
+def newDay(G):
+    for i in range(len(G.nodes)):
+        for j in G[i]:
+            G[i][j]['w'] = random.random()
+    return G
+
 
 def external_probability(p_list, omega, beta_list, nodes_list):
     N = len(p_list)
@@ -67,22 +75,73 @@ def GetNewProbability(G):
     return G
 
 
+def func(p):
+    return np.sqrt(p)
+
+
 def run(G, t):
+    sum = 0
+    w_list = np.zeros((t, len(G.nodes), len(G.nodes)))
+
+    for i in range(len(G.nodes)):
+        sum += func(G.nodes[i]['p'])
+
     T = np.arange(1, t, 1)
     for j in T:
-        print(f'День №{j + 1}****************************')
         G = GetNewProbability(G)
 
         for i in range(len(G.nodes)):
-            print(f"Нода номер: {i}, p =  {G.nodes[i]['p']}, Статус: {G.nodes[i]['isSick']}")
-            print('\n')
+            sum += func(G.nodes[i]['p'])
+            #print(f"Нода номер: {i}, p =  {G.nodes[i]['p']},w={G[i]},\n Статус: {G.nodes[i]['isSick']} ")
+            #print('\n')
+            for k in G[i]:
+                if i < k:
+                    w_list[j][i][k] = G[i][k]['w']
+        G = newDay(G)
+    print(w_list)
+    return sum, w_list
+
+def run2(G, t, x_list):
+    sum = 0
+    count = 0
+    w_list = np.zeros((t, len(G.nodes), len(G.nodes)))
+
+    for i in range(len(G.nodes)):
+        sum += func(G.nodes[i]['p'])
+
+    T = np.arange(1, t, 1)
+    for j in T:
+        G = GetNewProbability(G)
+        if G.nodes[j]['isSick'] == True:
+            count += 1
+        for i in range(len(G.nodes)):
+            sum += func(G.nodes[i]['p'])
+            #print(f"Нода номер: {i}, p =  {G.nodes[i]['p']},w={G[i]},\n Статус: {G.nodes[i]['isSick']} ")
+            #print('\n')
+            for k in G[i]:
+                if i < k:
+                    w_list[j][i][k] = G[i][k]['w']
+        G = newDay2(G, x_list)
+    print(w_list)
+    print(f'Заболевших:{count}')
+    return sum, w_list, count
+
+def newDay2(G, x_list):
+    for i in range(len(G.nodes)):
+        for j in G[i]:
+            G[i][j]['w'] = x_list[i]
+    return G
 
 
-G = generateGraph(10, 3)
-run(G, 100)
+T = 5
+N = 5
+G = generateGraph(N, 3)
 
-subax1 = plt.plot()
-nx.draw(G, with_labels=True, node_color='green')
-print(nx.edges(G))
 
-#plt.show()
+w_list = run(G, T)[1]
+
+
+np.savetxt('file.txt',)
+#subax1 = plt.plot()
+#nx.draw(G, with_labels=True, node_color='green')
+# plt.show()

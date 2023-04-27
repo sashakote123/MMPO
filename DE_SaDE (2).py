@@ -3,6 +3,15 @@ import math
 import numpy as np
 from statistics import mean
 from matplotlib import pyplot as plt
+from graph import *
+
+
+T = 5
+N = 5
+G = generateGraph(N, 3)
+def Fitness2(point):
+    return run2(G,T,point)[0]
+
 
 
 def Fitness22(point):
@@ -13,7 +22,7 @@ def Fitness22(point):
     J = 1/denominator
     return J
 
-def Fitness2(point):
+def Fitness22(point):
     x_mean = np.mean(point)
     return x_mean**2-(10*np.cos(2*np.pi*x_mean)+10)
 
@@ -197,10 +206,10 @@ def DE_func(n, population, strategy_success, list_f, cr_list):
 top = 10
 bottom = 0
 
-NP = 7
-M = 7
+NP = N
+M = N
 
-itr = 300   # Число итераций
+itr = 30   # Число итераций
 dim_up = 100000   # Контроль частоты увеличения размерности пространства параметров
 
 # SaDE

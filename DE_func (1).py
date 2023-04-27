@@ -3,6 +3,19 @@ import math
 import numpy as np
 from statistics import mean
 from matplotlib import pyplot as plt
+from graph import *
+
+
+T = 5
+N = 5
+G = generateGraph(N, 3)
+def Fitness2(point):
+    return run2(G,T,point)[0]
+
+
+
+
+
 
 
 def generateZeroMatrix(sizeN, sizeM):
@@ -36,7 +49,7 @@ def Fitness22(point):
 
     return sum
 
-def Fitness2(point):
+def Fitness22(point):
     sum = 0.0
     for i in range(len(point)):
         sum = sum + point[i] ** 2 - np.cos(2 * np.pi * point[i])
@@ -147,8 +160,8 @@ def DE_func_with_SoFa(N, firstPopulation):
 top = 10
 bottom = 0
 
-N = 10
-M = 10
+N = N
+M = N
 
 
 def GetLists(itr):
@@ -190,11 +203,11 @@ def GetLists(itr):
 
     return x_list, fitness_list, delta_last, x
 
-for i in range(30):
-    data = GetLists(50)
-    print(data[2], "на", data[3], 'итерации')
+#for i in range(10):
+#    data = GetLists(100)
+#    print(data[2], "на", data[3], 'итерации')
 
-data = GetLists(500)
+data = GetLists(1000)
 print(data[2], "на", data[3], 'итерации')
 
 plt.title("DE")
